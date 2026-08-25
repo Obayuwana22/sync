@@ -8,15 +8,25 @@ const RoomContext = createContext<RoomContextType | undefined>(undefined);
 
 export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeView, setActiveView] = useState<ActiveView>('room');
-  const [isDark, setIsDark] = useState<boolean>(true);
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('sync_theme');
+      if (savedTheme !== null) {
+        return savedTheme === 'dark';
+      }
+    }
+    return true;
+  });
   const [selectedTemplate, setSelectedTemplate] = useState<DesignTemplate>(DESIGN_TEMPLATES[0]);
 
-  // Apply dark class to <html>
+  // Sync dark class on <html> and save to localStorage when isDark changes
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('sync_theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('sync_theme', 'light');
     }
   }, [isDark]);
 

@@ -99,13 +99,13 @@ export const Navbar: React.FC = () => {
               setActiveView("landing");
               router.push("/");
             }}
-            className="flex items-center space-x-2 text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 hover:opacity-80 transition-opacity"
+            className="flex items-center space-x-2 text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 cursor-pointer"
             id="nav-logo-btn"
           >
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-bold text-xs">
               SR
             </div>
-            <span className="hidden sm:inline">Sync Room</span>
+            <span className="hidden sm:inline">Sync</span>
           </button>
 
           <span className="text-neutral-300 dark:text-neutral-700">/</span>
@@ -118,7 +118,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={handleCopyLink}
               title="Copy session invite code"
-              className="inline-flex items-center space-x-1 rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-2 py-0.5 text-[11px] font-mono text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="inline-flex items-center space-x-1 rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-2 py-0.5 text-[11px] font-mono text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
               id="copy-invite-code-btn"
             >
               <span>{room.code}</span>
@@ -191,7 +191,7 @@ export const Navbar: React.FC = () => {
                 <button
                   key={pill.id}
                   onClick={() => updateUserStatus(pill.id)}
-                  className={`flex items-center space-x-1.5 px-2.5 py-1 rounded text-xs transition-all duration-150 ${
+                  className={`flex items-center space-x-1.5 px-2.5 py-1 rounded text-xs transition-all duration-150 cursor-pointer ${
                     isActive
                       ? pill.activeStyle
                       : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/50"
@@ -214,7 +214,7 @@ export const Navbar: React.FC = () => {
                 setActiveView("room");
                 router.push("/room");
               }}
-              className={`p-1.5 rounded-md text-xs font-medium transition-colors flex items-center space-x-1 ${
+              className={`p-1.5 rounded-md text-xs font-medium transition-colors flex items-center space-x-1 cursor-pointer ${
                 activeView === "room"
                   ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                   : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
@@ -228,7 +228,7 @@ export const Navbar: React.FC = () => {
 
             <Link href="/history">
               <button
-                className={`p-1.5 rounded-md text-xs font-medium transition-colors flex items-center space-x-1 ${
+                className={`p-1.5 rounded-md text-xs font-medium transition-colors flex items-center space-x-1 cursor-pointer ${
                   activeView === "history"
                     ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                     : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
@@ -245,7 +245,7 @@ export const Navbar: React.FC = () => {
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className="rounded-md border border-neutral-200 dark:border-neutral-800 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            className="rounded-md border border-neutral-200 dark:border-neutral-800 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
             title={
               isDark
                 ? "Switch to Near-White theme"

@@ -49,7 +49,7 @@ export const SessionHistory: React.FC = () => {
             setActiveView('room');
             router.push('/room');
           }}
-          className="inline-flex items-center space-x-1.5 rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+          className="inline-flex items-center space-x-1.5 rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
           id="back-to-room-btn"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
