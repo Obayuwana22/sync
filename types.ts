@@ -129,6 +129,19 @@ export interface RoomContextType {
   isSimulationActive: boolean;
   setIsSimulationActive: (active: boolean) => void;
 
+  // Authentication & Auth Modal
+  isAuthenticated: boolean;
+  googleUser: {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string;
+  } | null;
+  loginWithGoogle: (email?: string, name?: string, avatar?: string) => Promise<void>;
+  logout: () => void;
+  isAuthModalOpen: boolean;
+  setIsAuthModalOpen: (open: boolean) => void;
+
   // History
   historyRecords: SessionHistoryRecord[];
   addHistoryRecord: (record: SessionHistoryRecord) => void;

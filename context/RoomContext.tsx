@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { DESIGN_TEMPLATES, INITIAL_PARTICIPANTS, INITIAL_ROOM, INITIAL_SESSION_HISTORY, INITIAL_TASKS } from '../data/initialData';
 import {RoomContextType, ActiveView, DesignTemplate, NudgeNotification, Participant, RoomSession, SessionHistoryRecord, Task, UserStatus } from '../types';
+import { createClient } from '@/lib/supabase/client';
 
 const RoomContext = createContext<RoomContextType | undefined>(undefined);
 
@@ -32,11 +33,172 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const toggleTheme = () => setIsDark(prev => !prev);
 
+  // Supabase Client Instance
+  const supabase = createClient();
+
+  // Auth State & Auth Modal
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [googleUser, setGoogleUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    avatar: string;
+  } | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sync_google_user');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return null;
+        }
+      }
+    }
+    return null;
+  });
+
+  const isAuthenticated = !!googleUser;
+
+  // Helper to sync user profile state from Supabase auth user
+  const syncUserData = useCallback((user: any) => {
+    if (!user) {
+      setGoogleUser(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('sync_google_user');
+      }
+      setParticipants(prev =>
+        prev.map(p =>
+          p.isCurrentUser
+            ? {
+                ...p,
+                name: 'Guest User',
+                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80',
+                role: 'Temporary Guest',
+              }
+            : p
+        )
+      );
+      return;
+    }
+
+    const meta = user.user_metadata || {};
+    const name = meta.full_name || meta.name || user.email?.split('@')[0] || 'Google User';
+    const avatar = meta.avatar_url || meta.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+
+    const userProfile = {
+      id: user.id || `google-${Date.now()}`,
+      name,
+      email: user.email || '',
+      avatar,
+    };
+
+    setGoogleUser(userProfile);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sync_google_user', JSON.stringify(userProfile));
+    }
+
+    setParticipants(prev =>
+      prev.map(p =>
+        p.isCurrentUser
+          ? {
+              ...p,
+              name: userProfile.name,
+              avatar: userProfile.avatar,
+              role: 'Google Authenticated',
+            }
+          : p
+      )
+    );
+  }, []);
+
+  // Sync Supabase Auth Session
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          syncUserData(user);
+        }
+      } catch (err) {
+        console.error("Error fetching Supabase user:", err);
+      }
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        syncUserData(session.user);
+      } else if (_event === 'SIGNED_OUT') {
+        syncUserData(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [syncUserData]);
+
+  // Login with Google handler
+  const loginWithGoogle = async (nextPath?: string) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const targetPath = nextPath && typeof nextPath === 'string' && nextPath.startsWith('/') ? nextPath : '/room';
+    const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(targetPath)}`;
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo,
+        queryParams: {
+          prompt: 'select_account',
+        },
+      },
+    });
+
+    if (error) {
+      console.error("Supabase Google sign in error:", error.message);
+      throw error;
+    }
+  };
+
+  // Logout handler
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error("Supabase sign out error:", err);
+    }
+    syncUserData(null);
+  };
+
   // Room state
   const [room, setRoom] = useState<RoomSession>(INITIAL_ROOM);
 
   // Participants
-  const [participants, setParticipants] = useState<Participant[]>(INITIAL_PARTICIPANTS);
+  const [participants, setParticipants] = useState<Participant[]>(() => {
+    if (googleUser) {
+      return INITIAL_PARTICIPANTS.map(p =>
+        p.isCurrentUser
+          ? {
+              ...p,
+              name: googleUser.name,
+              avatar: googleUser.avatar,
+              role: 'Google Authenticated',
+            }
+          : p
+      );
+    }
+    return INITIAL_PARTICIPANTS.map(p =>
+      p.isCurrentUser
+        ? {
+            ...p,
+            name: 'Guest User',
+            avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80',
+            role: 'Temporary Guest',
+          }
+        : p
+    );
+  });
 
   // Tasks
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
@@ -349,6 +511,12 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsSimulationActive,
         historyRecords,
         addHistoryRecord,
+        isAuthenticated,
+        googleUser,
+        loginWithGoogle,
+        logout,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
       }}
     >
       {children}

@@ -104,7 +104,7 @@ export const TaskList: React.FC = () => {
             <button
               key={f.id}
               onClick={() => setFilter(f.id as any)}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
+              className={`px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
                 filter === f.id
                   ? 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900'
                   : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
@@ -138,12 +138,12 @@ export const TaskList: React.FC = () => {
             <select
               value={selectedAssignee}
               onChange={e => setSelectedAssignee(e.target.value)}
-              className="bg-neutral-50 dark:bg-neutral-800 text-xs text-neutral-700 dark:text-neutral-300 rounded px-2 py-1.5 border border-neutral-200 dark:border-neutral-700 focus:outline-none"
+              className="bg-neutral-50 dark:bg-neutral-800 text-xs text-black dark:text-neutral-100 font-medium rounded px-2 py-1.5 border border-neutral-200 dark:border-neutral-700 focus:outline-none focus:text-black dark:focus:text-white cursor-pointer"
               id="assignee-select"
             >
-              <option value={currentUser.id}>Assign to: Me</option>
+              <option className="bg-white text-black dark:bg-neutral-900 dark:text-white" value={currentUser.id}>Assign to: Me</option>
               {participants.filter(p => !p.isCurrentUser).map(p => (
-                <option key={p.id} value={p.id}>
+                <option className="bg-white text-black dark:bg-neutral-900 dark:text-white" key={p.id} value={p.id}>
                   Assign to: {p.name.split(' ')[0]}
                 </option>
               ))}
@@ -153,22 +153,22 @@ export const TaskList: React.FC = () => {
             <select
               value={selectedEstMinutes}
               onChange={e => setSelectedEstMinutes(Number(e.target.value))}
-              className="bg-neutral-50 dark:bg-neutral-800 text-xs text-neutral-700 dark:text-neutral-300 rounded px-2 py-1.5 border border-neutral-200 dark:border-neutral-700 focus:outline-none font-mono"
+              className="bg-neutral-50 dark:bg-neutral-800 text-xs text-black dark:text-neutral-100 font-medium rounded px-2 py-1.5 border border-neutral-200 dark:border-neutral-700 focus:outline-none focus:text-black dark:focus:text-white cursor-pointer font-mono"
               id="est-minutes-select"
             >
-              <option value={15}>15m</option>
-              <option value={25}>25m</option>
-              <option value={45}>45m</option>
-              <option value={60}>60m</option>
+              <option className="bg-white text-black dark:bg-neutral-900 dark:text-white" value={15}>15m</option>
+              <option className="bg-white text-black dark:bg-neutral-900 dark:text-white" value={25}>25m</option>
+              <option className="bg-white text-black dark:bg-neutral-900 dark:text-white" value={45}>45m</option>
+              <option className="bg-white text-black dark:bg-neutral-900 dark:text-white" value={60}>60m</option>
             </select>
 
             <button
               type="submit"
               disabled={!newTaskTitle.trim()}
-              className="inline-flex items-center space-x-1 rounded-md bg-indigo-600 dark:bg-indigo-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-40 transition-all shadow-xs"
+              className={`inline-flex items-center space-x-1 rounded-md bg-indigo-600 dark:bg-indigo-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-40 transition-all shadow-xs  ${newTaskTitle ? "cursor-pointer" : "cursor-not-allowed" }`}
               id="add-task-submit-btn"
             >
-              <span>Add</span>
+              <span>Add task</span>
             </button>
           </div>
 
@@ -235,13 +235,13 @@ export const TaskList: React.FC = () => {
                   <select
                     value={task.status}
                     onChange={e => updateTaskStatus(task.id, e.target.value as TaskStatus)}
-                    className="bg-transparent text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 cursor-pointer focus:outline-none"
+                    className="bg-transparent text-xs text-black dark:text-neutral-100 font-medium active:text-black focus:text-black dark:focus:text-white hover:text-black dark:hover:text-white cursor-pointer focus:outline-none"
                     id={`task-status-select-${task.id}`}
                   >
-                    <option value="todo">To do</option>
-                    <option value="in_progress">In progress</option>
-                    <option value="blocked">Blocked</option>
-                    <option value="done">Completed</option>
+                    <option className="bg-white text-black dark:bg-neutral-900 dark:text-white" value="todo">To do</option>
+                    <option className="bg-white text-black dark:bg-neutral-900 dark:text-white" value="in_progress">In progress</option>
+                    <option className="bg-white text-black dark:bg-neutral-900 dark:text-white" value="blocked">Blocked</option>
+                    <option className="bg-white text-black dark:bg-neutral-900 dark:text-white" value="done">Completed</option>
                   </select>
 
                   {/* Est Time */}

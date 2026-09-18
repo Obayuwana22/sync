@@ -70,7 +70,7 @@ export const ParticipantsSidebar: React.FC = () => {
 
         <button
           onClick={addSimulatedTeammate}
-          className="inline-flex items-center space-x-1 rounded-md border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs text-zinc-300 hover:bg-zinc-800 transition-colors"
+          className="inline-flex items-center space-x-1 rounded-md border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs text-zinc-300 hover:bg-zinc-800 transition-colors cursor-pointer"
           title="Add a co-working teammate"
           id="add-teammate-btn"
         >
