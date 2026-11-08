@@ -3,12 +3,13 @@
 import { Navbar } from "@/components/Navbar";
 import { RoomView } from "@/components/RoomView";
 import { GuestBanner } from "@/components/GuestBanner";
+import { InviteModal } from "@/components/InviteModal";
 import { useRoom } from "@/context/RoomContext";
 import React, { useState } from "react";
 import { NudgeToastContainer } from "@/components/NudgeToastContainer";
 
 export default function RoomPage() {
-  const { isAuthenticated, setIsAuthModalOpen } = useRoom();
+  const { isAuthenticated, setIsAuthModalOpen, isInviteModalOpen, setIsInviteModalOpen } = useRoom();
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
   return (
@@ -21,6 +22,10 @@ export default function RoomPage() {
         />
       )}
       <RoomView />
+      <InviteModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+      />
       <NudgeToastContainer />
     </div>
   );

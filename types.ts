@@ -11,8 +11,9 @@ export interface Participant {
   role: string;
   status: UserStatus;
   statusNote?: string;
-  lastActiveTimestamp: number; // Date.now() offset
+  lastActiveTimestamp: number;
   isCurrentUser?: boolean;
+  isOnline?: boolean;
   isSimulated?: boolean;
   tasksCount?: {
     total: number;
@@ -31,6 +32,8 @@ export interface Task {
   createdAt: number;
   estimatedMinutes?: number;
   completedAt?: number;
+  lastMovedBy?: string;
+  lastMovedAt?: number;
 }
 
 export interface RoomSession {
@@ -71,7 +74,7 @@ export interface SessionHistoryRecord {
   participantsCount: number;
   tasksCompleted: number;
   totalTasks: number;
-  focusScore: number; // percentage e.g. 92%
+  focusScore: number;
   tags: string[];
 }
 
@@ -86,8 +89,26 @@ export interface NudgeNotification {
   type: 'idle' | 'stuck' | 'encouragement';
 }
 
-export type ActiveView = 'landing' | 'room' | 'history';
+export interface TaskActivityNotification {
+  id: string;
+  taskId: string;
+  taskTitle: string;
+  movedBy: string;
+  newStatus: TaskStatus;
+  timestamp: number;
+  activityType?: 'moved' | 'completed' | 'added' | 'blocked' | 'deleted';
+}
 
+export interface RoomInvite {
+  id: string;
+  email: string;
+  role: string;
+  invitedAt: number;
+  invitedBy?: string;
+  status: 'pending' | 'joined';
+}
+
+export type ActiveView = 'landing' | 'room' | 'history';
 
 export interface RoomContextType {
   // Navigation & Theme
@@ -105,13 +126,30 @@ export interface RoomContextType {
   toggleTimer: () => void;
   resetTimer: () => void;
   setTimerMinutes: (mins: number) => void;
+  completeSession: () => void;
 
-  // Participants & User Status
+  // Real-Time WebSocket Connection
+  isConnected: boolean;
+  lastTaskActivity: TaskActivityNotification | null;
+  taskActivities: TaskActivityNotification[];
+  dismissTaskActivity: () => void;
+  dismissTaskActivityById: (id: string) => void;
+  joinRoomByCode: (code: string) => void;
+
+  // Participants & User Status (Real-Time connected users only)
   participants: Participant[];
   currentUser: Participant;
   updateUserStatus: (status: UserStatus, note?: string) => void;
-  addSimulatedTeammate: () => void;
+  updateCurrentUserName: (name: string) => void;
+  addParticipant: (name: string, role?: string, avatar?: string) => void;
   removeParticipant: (id: string) => void;
+
+  // Room Invites (Email & Shareable Links)
+  pendingInvites: RoomInvite[];
+  sendEmailInvite: (email: string, role?: string) => Promise<{ success: boolean; error?: string }>;
+  cancelInvite: (inviteId: string) => void;
+  isInviteModalOpen: boolean;
+  setIsInviteModalOpen: (open: boolean) => void;
   
   // Tasks
   tasks: Task[];
@@ -125,10 +163,6 @@ export interface RoomContextType {
   sendNudge: (targetId: string, message?: string) => void;
   dismissNudge: (nudgeId: string) => void;
 
-  // Simulation & Multi-tab
-  isSimulationActive: boolean;
-  setIsSimulationActive: (active: boolean) => void;
-
   // Authentication & Auth Modal
   isAuthenticated: boolean;
   googleUser: {
@@ -137,7 +171,7 @@ export interface RoomContextType {
     email: string;
     avatar: string;
   } | null;
-  loginWithGoogle: (email?: string, name?: string, avatar?: string) => Promise<void>;
+  loginWithGoogle: (nextPath?: string) => Promise<void>;
   logout: () => void;
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;

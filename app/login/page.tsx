@@ -12,9 +12,15 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/room";
 
-  const { loginWithGoogle, isDark, toggleTheme } = useRoom();
+  const { loginWithGoogle, isDark, toggleTheme, isAuthenticated } = useRoom();
   const [isLoading, setIsLoading] = useState(false);
   const [openGuestBanner, setOpenGuestBanner] = useState(false);
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      router.replace(callbackUrl);
+    }
+  }, [isAuthenticated, callbackUrl, router]);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);

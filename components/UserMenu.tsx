@@ -17,7 +17,7 @@ import { UserStatus } from "../types";
 import { useRouter } from "next/navigation";
 
 interface UserMenuProps {
-  onOpenAuthModal: () => void;
+  onOpenAuthModal?: () => void;
 }
 
 export const UserMenu: React.FC<UserMenuProps> = ({ onOpenAuthModal }) => {
@@ -70,7 +70,13 @@ export const UserMenu: React.FC<UserMenuProps> = ({ onOpenAuthModal }) => {
   if (!isAuthenticated) {
     return (
       <button
-        onClick={() => router.push('/login')}
+        onClick={() => {
+          if (onOpenAuthModal) {
+            onOpenAuthModal();
+          } else {
+            router.push('/login?callbackUrl=/room');
+          }
+        }}
         className="inline-flex items-center space-x-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 text-xs font-semibold shadow-xs transition-all cursor-pointer"
         id="nav-signin-google-btn"
       >
@@ -107,7 +113,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ onOpenAuthModal }) => {
       >
         <div className="relative">
           <img
-            src={currentUser.avatar}
+            src={currentUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=6366f1&color=fff`}
             alt={currentUser.name}
             className="h-7 w-7 rounded-full object-cover border border-neutral-200 dark:border-neutral-700"
           />
@@ -134,7 +140,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ onOpenAuthModal }) => {
           {/* User Details */}
           <div className="flex items-center space-x-3 pb-3 border-b border-neutral-200 dark:border-neutral-800">
             <img
-              src={currentUser.avatar}
+              src={currentUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=6366f1&color=fff`}
               alt={currentUser.name}
               className="h-10 w-10 rounded-full object-cover border border-neutral-200 dark:border-neutral-700"
             />

@@ -13,6 +13,7 @@ import {
   Users,
   BarChart3,
   Sparkles,
+  UserPlus,
 } from "lucide-react";
 import { useRoom } from "../context/RoomContext";
 import { UserStatus } from "../types";
@@ -20,6 +21,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { UserMenu } from "./UserMenu";
 import { AuthModal } from "./AuthModal";
+import { InviteModal } from "./InviteModal";
 
 export const Navbar: React.FC = () => {
   const router = useRouter();
@@ -33,10 +35,14 @@ export const Navbar: React.FC = () => {
     toggleTimer,
     resetTimer,
     setTimerMinutes,
+    completeSession,
     currentUser,
     updateUserStatus,
     isAuthModalOpen,
     setIsAuthModalOpen,
+    isInviteModalOpen,
+    setIsInviteModalOpen,
+    isConnected,
   } = useRoom();
 
   const [copied, setCopied] = useState(false);
@@ -53,9 +59,12 @@ export const Navbar: React.FC = () => {
   const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (typeof window !== "undefined") {
+      const url = `${window.location.origin}/room?code=${room.code}`;
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const statusPills: {
@@ -97,10 +106,7 @@ export const Navbar: React.FC = () => {
               href="/"
               className="flex items-center space-x-2 cursor-pointer group"
             >
-              {/* <div className="flex h-7 w-7 items-center justify-center rounded-md bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-bold text-xs">
-                S
-              </div> */}
-               <img src="/icon.png" alt="sync logo" className="h-7 w-7" />
+              <img src="/icon.png" alt="sync logo" className="h-7 w-7" />
               <span className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
                 Sync
               </span>
@@ -108,22 +114,47 @@ export const Navbar: React.FC = () => {
 
             <span className="text-neutral-300 dark:text-neutral-700">/</span>
 
-            {/* Room Code Badge */}
-            <button
-              onClick={handleCopyLink}
-              className="inline-flex items-center space-x-1.5 rounded-md bg-neutral-100 dark:bg-neutral-900 px-2 py-1 text-xs font-mono text-neutral-600 dark:text-neutral-400 border border-neutral-200/80 dark:border-neutral-800/80 hover:bg-neutral-200/60 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
-              title="Click to copy room link"
-              id="room-code-badge"
+            {/* Room Code Badge & Invite Button */}
+            <div className="flex items-center space-x-1.5">
+              <button
+                onClick={handleCopyLink}
+                className="inline-flex items-center space-x-1.5 rounded-md bg-neutral-100 dark:bg-neutral-900 px-2 py-1 text-xs font-mono text-neutral-600 dark:text-neutral-400 border border-neutral-200/80 dark:border-neutral-800/80 hover:bg-neutral-200/60 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                title="Click to copy shareable room link for other devices"
+                id="room-code-badge"
+              >
+                <span className="font-semibold text-neutral-800 dark:text-neutral-200">
+                  {room.code}
+                </span>
+                {copied ? (
+                  <Check className="h-3 w-3 text-emerald-500" />
+                ) : (
+                  <Copy className="h-3 w-3 text-neutral-400" />
+                )}
+              </button>
+
+              <button
+                onClick={() => setIsInviteModalOpen(true)}
+                className="inline-flex items-center space-x-1.5 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                title="Invite teammate to this focus room"
+                id="nav-invite-btn"
+              >
+                <UserPlus className="h-3.5 w-3.5" />
+                <span>Invite</span>
+              </button>
+            </div>
+
+            {/* Live WebSocket Indicator */}
+            {/* <span
+              className={`hidden md:inline-flex items-center space-x-1 text-[10px] px-1.5 py-0.5 rounded ${
+                isConnected
+                  ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20'
+                  : 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20'
+              }`}
+              title={isConnected ? "WebSocket connected across devices" : "Connecting..."}
             >
-              <span className="font-semibold text-neutral-800 dark:text-neutral-200">
-                {room.code}
-              </span>
-              {copied ? (
-                <Check className="h-3 w-3 text-emerald-500" />
-              ) : (
-                <Copy className="h-3 w-3 text-neutral-400" />
-              )}
-            </button>
+              <span className={`h-1.5 w-1.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <span>{isConnected ? 'Live WebSocket' : 'Connecting'}</span>
+            </span> */}
           </div>
 
           {/* Center Section: Compact Room Timer */}
@@ -158,6 +189,17 @@ export const Navbar: React.FC = () => {
             >
               <RotateCcw className="h-3 w-3" />
             </button>
+
+            {room.elapsedSeconds > 0 && (
+              <button
+                onClick={completeSession}
+                className="p-1 text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                title="Finish session & log to history"
+                id="timer-complete-btn"
+              >
+                <Check className="h-3.5 w-3.5" />
+              </button>
+            )}
 
             {/* Quick presets */}
             <div className="ml-1 flex items-center space-x-1 border-l border-neutral-200 dark:border-neutral-800 pl-2">

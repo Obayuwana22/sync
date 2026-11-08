@@ -32,6 +32,7 @@ import { AuthModal } from "./AuthModal";
 export const LandingPage: React.FC = () => {
   const router = useRouter();
   const {
+    isAuthenticated,
     setActiveView,
     selectedTemplate,
     setSelectedTemplate,
@@ -42,23 +43,15 @@ export const LandingPage: React.FC = () => {
     isAuthModalOpen,
   } = useRoom();
 
-  // Interactive Live Demo State
-  const [demoStatus, setDemoStatus] = useState<UserStatus>("working");
-  const [demoNote, setDemoNote] = useState("Refactoring API state hooks");
-  const [demoTimerRunning, setDemoTimerRunning] = useState(false);
-  const [demoTimerSeconds, setDemoTimerSeconds] = useState(1420); // 23:40
-  const [demoNudgeSent, setDemoNudgeSent] = useState(false);
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
-
-  // Demo timer tick
+  // Redirect to dashboard (/room) if user is authenticated
   React.useEffect(() => {
-    if (!demoTimerRunning) return;
-    const interval = setInterval(() => {
-      setDemoTimerSeconds((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [demoTimerRunning]);
+    if (isAuthenticated) {
+      setActiveView("room");
+      router.replace("/room");
+    }
+  }, [isAuthenticated, router, setActiveView]);
 
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const handleSelectTemplate = (template: DesignTemplate) => {
     setSelectedTemplate(template);
   };
@@ -68,8 +61,6 @@ export const LandingPage: React.FC = () => {
     setActiveView("room");
     router.push("/room");
   };
-
-  const formattedDemoTime = `${String(Math.floor(demoTimerSeconds / 60)).padStart(2, "0")}:${String(demoTimerSeconds % 60).padStart(2, "0")}`;
 
   const faqItems = [
     {
@@ -94,6 +85,19 @@ export const LandingPage: React.FC = () => {
     },
   ];
 
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Redirecting to dashboard...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-200 selection:bg-indigo-500/20 selection:text-indigo-400 font-sans">
       {/* 1. Header Navigation Bar */}
@@ -111,22 +115,34 @@ export const LandingPage: React.FC = () => {
 
           {/* Navigation Anchor Links */}
           <nav className="hidden md:flex items-center space-x-6 text-xs font-medium text-neutral-600 dark:text-zinc-400">
-            <a href="#demo" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
-              Live Demo
-            </a>
-            <a href="#features" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
+            <a
+              href="#features"
+              className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+            >
               Features
             </a>
-            <a href="#templates" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
+            <a
+              href="#templates"
+              className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+            >
               Aesthetics
             </a>
-            <a href="#workflows" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
+            <a
+              href="#workflows"
+              className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+            >
               Sprint Modes
             </a>
-            <a href="#analytics" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
+            <a
+              href="#analytics"
+              className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+            >
               Analytics
             </a>
-            <a href="#faq" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
+            <a
+              href="#faq"
+              className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+            >
               FAQ
             </a>
           </nav>
@@ -164,10 +180,10 @@ export const LandingPage: React.FC = () => {
       <section className="relative pt-16 pb-20 lg:pt-24 lg:pb-28 overflow-hidden">
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
           {/* Subtle Pill Tag */}
-          <div className="inline-flex items-center space-x-2 rounded-full border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3.5 py-1.5 text-xs text-neutral-600 dark:text-zinc-400">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
-            <span className="font-medium">Real-Time Co-Working & Silent Focus</span>
-            <span className="text-neutral-300 dark:text-zinc-700">•</span>
+          <div className="flex flex-col items-center space-x-2 px-3.5 py-1.5 text-xs text-neutral-600 dark:text-indigo-400">
+            <span className="font-medium">
+              Real-Time Co-Working & Silent Focus
+            </span>
             <span>Zero Video Fatigue</span>
           </div>
 
@@ -178,7 +194,9 @@ export const LandingPage: React.FC = () => {
 
           {/* Supporting Subtext */}
           <p className="text-lg sm:text-xl text-neutral-600 dark:text-zinc-400 max-w-2xl mx-auto font-normal leading-relaxed">
-            See live presence status, share real-time task progress, and keep each other accountable in quiet, synced focus rooms without noisy meetings.
+            See live presence status, share real-time task progress, and keep
+            each other accountable in quiet, synced focus rooms without noisy
+            meetings.
           </p>
 
           {/* CTA Buttons */}
@@ -191,276 +209,12 @@ export const LandingPage: React.FC = () => {
               <span>Start a Free Focus Room</span>
               <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
             </button>
-
-            <a
-              href="#demo"
-              className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 rounded-lg border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-3.5 text-sm font-medium text-neutral-700 dark:text-zinc-300 hover:bg-neutral-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-            >
-              <span>Try Interactive Sandbox</span>
-              <Play className="h-3.5 w-3.5 text-zinc-400" />
-            </a>
-          </div>
-
-          {/* Live Social Proof Badge */}
-          <div className="pt-6 flex flex-wrap items-center justify-center gap-3 text-xs text-neutral-500 dark:text-zinc-400">
-            <div className="flex -space-x-2 overflow-hidden">
-              <img
-                className="inline-block h-7 w-7 rounded-full ring-2 ring-white dark:ring-zinc-950 object-cover"
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80"
-                alt="Alex"
-              />
-              <img
-                className="inline-block h-7 w-7 rounded-full ring-2 ring-white dark:ring-zinc-950 object-cover"
-                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80"
-                alt="Sarah"
-              />
-              <img
-                className="inline-block h-7 w-7 rounded-full ring-2 ring-white dark:ring-zinc-950 object-cover"
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80"
-                alt="Marcus"
-              />
-              <img
-                className="inline-block h-7 w-7 rounded-full ring-2 ring-white dark:ring-zinc-950 object-cover"
-                src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80"
-                alt="Elena"
-              />
-            </div>
-            <span>Joined by <strong className="text-neutral-900 dark:text-neutral-100">10,000+</strong> engineers, designers & remote teams</span>
-            <span className="text-neutral-300 dark:text-zinc-700">•</span>
-            <span className="font-semibold text-neutral-900 dark:text-neutral-100">★ 4.9/5</span>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Interactive Live Room Sandbox */}
-      <section id="demo" className="py-16 border-t border-neutral-200 dark:border-zinc-800/80 bg-neutral-100/60 dark:bg-zinc-900/40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
-            <div className="inline-flex items-center space-x-1.5 text-xs font-semibold text-neutral-500 dark:text-zinc-400 uppercase tracking-wider">
-              <Activity className="h-3.5 w-3.5 text-indigo-500" />
-              <span>Interactive Sandbox</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
-              Experience the Sync workspace live
-            </h2>
-            <p className="text-xs sm:text-sm text-neutral-600 dark:text-zinc-400">
-              Test status dot toggles, timer controls, and focus nudges directly in the interactive sandbox below.
-            </p>
-          </div>
-
-          {/* Live Sandbox Container */}
-          <div className="rounded-xl border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden">
-            {/* Header Bar */}
-            <div className="flex flex-wrap items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-zinc-800 bg-neutral-50/80 dark:bg-zinc-950/80 gap-3">
-              <div className="flex items-center space-x-2">
-                <img src="/icon.png" alt="sync logo" className="h-5 w-5" />
-                <span className="text-xs font-semibold text-neutral-900 dark:text-neutral-100">
-                  Product Engineering #focus
-                </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono border border-neutral-200 dark:border-zinc-800 text-neutral-500 dark:text-zinc-400">
-                  SYNC-8492
-                </span>
-              </div>
-
-              {/* Demo Timer Controls */}
-              <div className="flex items-center space-x-2 rounded-md border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-1 text-xs">
-                <Clock className="h-3.5 w-3.5 text-zinc-400" />
-                <span className="font-mono font-semibold text-neutral-900 dark:text-neutral-100 tabular-nums">
-                  {formattedDemoTime}
-                </span>
-                <button
-                  onClick={() => setDemoTimerRunning((prev) => !prev)}
-                  className="p-1 rounded bg-neutral-100 dark:bg-zinc-800 hover:bg-neutral-200 dark:hover:bg-zinc-700 transition-colors text-neutral-700 dark:text-zinc-300 cursor-pointer"
-                  title={demoTimerRunning ? "Pause timer" : "Start timer"}
-                >
-                  {demoTimerRunning ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                </button>
-                <button
-                  onClick={() => setDemoTimerSeconds(1500)}
-                  className="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
-                  title="Reset demo timer"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                </button>
-              </div>
-
-              {/* Status Dot Toggle Pills for Demo User */}
-              <div className="flex items-center space-x-1 rounded-md border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-800/60 p-0.5">
-                {(["working", "break", "stuck"] as UserStatus[]).map((st) => (
-                  <button
-                    key={st}
-                    onClick={() => {
-                      setDemoStatus(st);
-                      if (st === "working") setDemoNote("Refactoring API state hooks");
-                      if (st === "break") setDemoNote("Grabbing green tea");
-                      if (st === "stuck") setDemoNote("Waiting for design review");
-                    }}
-                    className={`px-2 py-0.5 rounded text-[11px] font-medium capitalize transition-all cursor-pointer ${
-                      demoStatus === st
-                        ? "bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100 shadow-2xs font-semibold"
-                        : "text-neutral-500 hover:text-neutral-800 dark:hover:text-zinc-200"
-                    }`}
-                  >
-                    ● {st}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Sandbox Content */}
-            <div className="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-neutral-200 dark:divide-zinc-800">
-              {/* Presence Sidebar */}
-              <div className="md:col-span-5 p-4 space-y-3 bg-neutral-50/40 dark:bg-zinc-950/40">
-                <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-zinc-800">
-                  <span className="text-xs font-semibold text-neutral-700 dark:text-zinc-300">
-                    Live Room Teammates (4)
-                  </span>
-                  <span className="text-[10px] font-mono text-indigo-500">LIVE</span>
-                </div>
-
-                {/* You */}
-                <div className="flex items-center justify-between p-2.5 rounded-lg border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-                  <div className="flex items-center space-x-2.5">
-                    <img
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80"
-                      className="h-8 w-8 rounded-full object-cover border border-neutral-300 dark:border-zinc-700"
-                      alt="Alex"
-                    />
-                    <div>
-                      <div className="flex items-center space-x-1.5">
-                        <span className="text-xs font-semibold text-neutral-900 dark:text-neutral-100">
-                          Alex Chen (You)
-                        </span>
-                        <span
-                          className={`h-2 w-2 rounded-full ${
-                            demoStatus === "working"
-                              ? "bg-emerald-500"
-                              : demoStatus === "break"
-                              ? "bg-amber-500"
-                              : "bg-rose-500"
-                          }`}
-                        />
-                      </div>
-                      <p className="text-[11px] text-neutral-500 dark:text-zinc-400">
-                        {demoNote}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-mono text-neutral-400">Active</span>
-                </div>
-
-                {/* Teammate 2 */}
-                <div className="flex items-center justify-between p-2.5 rounded-lg border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-                  <div className="flex items-center space-x-2.5">
-                    <img
-                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80"
-                      className="h-8 w-8 rounded-full object-cover"
-                      alt="Sarah"
-                    />
-                    <div>
-                      <div className="flex items-center space-x-1.5">
-                        <span className="text-xs font-semibold text-neutral-900 dark:text-neutral-100">
-                          Sarah Miller
-                        </span>
-                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                      </div>
-                      <p className="text-[11px] text-neutral-500 dark:text-zinc-400">
-                        Building state hooks
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setDemoNudgeSent(true);
-                      setTimeout(() => setDemoNudgeSent(false), 2500);
-                    }}
-                    className="text-[10px] px-2 py-1 rounded border border-neutral-200 dark:border-zinc-700 bg-neutral-50 dark:bg-zinc-800 hover:bg-neutral-100 text-neutral-700 dark:text-zinc-300 transition-colors cursor-pointer"
-                  >
-                    {demoNudgeSent ? "Nudged! ✨" : "Send Nudge"}
-                  </button>
-                </div>
-
-                {/* Teammate 3 */}
-                <div className="flex items-center justify-between p-2.5 rounded-lg border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-                  <div className="flex items-center space-x-2.5">
-                    <img
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80"
-                      className="h-8 w-8 rounded-full object-cover"
-                      alt="Marcus"
-                    />
-                    <div>
-                      <div className="flex items-center space-x-1.5">
-                        <span className="text-xs font-semibold text-neutral-900 dark:text-neutral-100">
-                          Marcus Vance
-                        </span>
-                        <span className="h-2 w-2 rounded-full bg-rose-500" />
-                      </div>
-                      <p className="text-[11px] text-neutral-500 dark:text-zinc-400">
-                        Blocked on design tokens
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-medium text-neutral-600 dark:text-zinc-400 border border-neutral-200 dark:border-zinc-700 px-1.5 py-0.5 rounded">
-                    Stuck
-                  </span>
-                </div>
-              </div>
-
-              {/* Task Board Column */}
-              <div className="md:col-span-7 p-4 space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-zinc-800">
-                  <span className="text-xs font-semibold text-neutral-700 dark:text-zinc-300">
-                    Shared Session Tasks (3 of 4 Done)
-                  </span>
-                  <div className="w-24 bg-neutral-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-neutral-900 dark:bg-white h-full w-[75%]" />
-                  </div>
-                </div>
-
-                {/* Sample Tasks */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-2.5 rounded-md border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle2 className="h-4 w-4 text-neutral-400" />
-                      <span className="line-through text-neutral-400">
-                        Migrate user session tokens to HttpOnly cookies
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-mono text-neutral-400">45m</span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-2.5 rounded-md border border-neutral-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs">
-                    <div className="flex items-center space-x-2">
-                      <div className="h-4 w-4 rounded border border-neutral-400 dark:border-zinc-500 flex items-center justify-center font-bold text-[10px]">
-                        ●
-                      </div>
-                      <span className="font-medium text-neutral-900 dark:text-neutral-100">
-                        Implement optimistic UI for status dot transitions
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-mono text-neutral-900 dark:text-neutral-100 font-semibold">
-                      In Progress
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-2.5 rounded-md border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle2 className="h-4 w-4 text-neutral-400" />
-                      <span className="line-through text-neutral-400">
-                        Audit accessibility colors for WCAG AA in dark theme
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-mono text-neutral-400">25m</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
       {/* 4. Recommended Design Templates Chooser */}
-      <section id="templates" className="py-16 border-t border-neutral-200 dark:border-zinc-800/80">
+      {/* <section id="templates" className="py-16 border-t border-neutral-200 dark:border-zinc-800/80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-2">
             <div>
@@ -535,10 +289,13 @@ export const LandingPage: React.FC = () => {
             })}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* 5. Key Product Features Grid */}
-      <section id="features" className="py-20 border-t border-neutral-200 dark:border-zinc-800/80 bg-neutral-100/40 dark:bg-zinc-900/20">
+      <section
+        id="features"
+        className="py-20 border-t border-neutral-200 dark:border-zinc-800/80 bg-neutral-100/40 dark:bg-zinc-900/20"
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-14 space-y-2">
             <div className="inline-flex items-center space-x-1.5 text-xs font-semibold text-neutral-500 dark:text-zinc-400 uppercase tracking-wider">
@@ -549,7 +306,8 @@ export const LandingPage: React.FC = () => {
               Everything you need for seamless deep work
             </h2>
             <p className="text-sm text-neutral-600 dark:text-zinc-400">
-              Sync combines live presence, synchronized timers, and low-friction task tracking into a calm interface.
+              Sync combines live presence, synchronized timers, and low-friction
+              task tracking into a calm interface.
             </p>
           </div>
 
@@ -563,7 +321,8 @@ export const LandingPage: React.FC = () => {
                 Live Teammate Presence
               </h3>
               <p className="text-xs text-neutral-600 dark:text-zinc-400 leading-relaxed">
-                See real-time status dots (Working, Break, Stuck) and custom status notes without interrupting anyone with video calls.
+                See real-time status dots (Working, Break, Stuck) and custom
+                status notes without interrupting anyone with video calls.
               </p>
             </div>
 
@@ -576,7 +335,8 @@ export const LandingPage: React.FC = () => {
                 Synced Sprint Timers
               </h3>
               <p className="text-xs text-neutral-600 dark:text-zinc-400 leading-relaxed">
-                Run synchronized 25m Pomodoros, 50m deep flow sprints, or open stopwatches with automatic break notifications.
+                Run synchronized 25m Pomodoros, 50m deep flow sprints, or open
+                stopwatches with automatic break notifications.
               </p>
             </div>
 
@@ -589,7 +349,8 @@ export const LandingPage: React.FC = () => {
                 Shared Task Board
               </h3>
               <p className="text-xs text-neutral-600 dark:text-zinc-400 leading-relaxed">
-                Create, assign, and track session tasks in real time. Watch team progress bars update live as items get completed.
+                Create, assign, and track session tasks in real time. Watch team
+                progress bars update live as items get completed.
               </p>
             </div>
 
@@ -602,7 +363,8 @@ export const LandingPage: React.FC = () => {
                 Low-Friction Nudges
               </h3>
               <p className="text-xs text-neutral-600 dark:text-zinc-400 leading-relaxed">
-                Send 1-click focus encouragement or offer help when teammates mark themselves as stuck without needing a meeting.
+                Send 1-click focus encouragement or offer help when teammates
+                mark themselves as stuck without needing a meeting.
               </p>
             </div>
 
@@ -615,7 +377,8 @@ export const LandingPage: React.FC = () => {
                 Custom Visual Aesthetics
               </h3>
               <p className="text-xs text-neutral-600 dark:text-zinc-400 leading-relaxed">
-                Choose from curated visual design templates tailored for daytime focus or quiet night hours with minimal eye strain.
+                Choose from curated visual design templates tailored for daytime
+                focus or quiet night hours with minimal eye strain.
               </p>
             </div>
 
@@ -628,7 +391,8 @@ export const LandingPage: React.FC = () => {
                 Focus Scores & History
               </h3>
               <p className="text-xs text-neutral-600 dark:text-zinc-400 leading-relaxed">
-                Review focus vs break distribution, completed sprint counts, session tags, and focus quality analytics.
+                Review focus vs break distribution, completed sprint counts,
+                session tags, and focus quality analytics.
               </p>
             </div>
           </div>
@@ -636,7 +400,10 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 6. Preset Focus Workflows Section */}
-      <section id="workflows" className="py-16 border-t border-neutral-200 dark:border-zinc-800/80">
+      <section
+        id="workflows"
+        className="py-16 border-t border-neutral-200 dark:border-zinc-800/80"
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-2">
             <div>
@@ -649,7 +416,8 @@ export const LandingPage: React.FC = () => {
               </h2>
             </div>
             <p className="text-xs text-neutral-500 dark:text-zinc-400">
-              Click any workflow card to launch directly into a preset room session
+              Click any workflow card to launch directly into a preset room
+              session
             </p>
           </div>
 
@@ -668,7 +436,8 @@ export const LandingPage: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-neutral-500 dark:text-zinc-400 leading-relaxed">
-                Designed for complex architecture, deep coding, or writing sessions requiring uninterrupted concentration.
+                Designed for complex architecture, deep coding, or writing
+                sessions requiring uninterrupted concentration.
               </p>
               <div className="pt-2 flex items-center text-xs font-medium text-neutral-900 dark:text-neutral-100 group-hover:translate-x-1 transition-transform">
                 <span>Start 50m Sprint</span>
@@ -690,7 +459,8 @@ export const LandingPage: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-neutral-500 dark:text-zinc-400 leading-relaxed">
-                Perfect for quick iterative bursts, pull request reviews, bug squashing, and administrative tasks.
+                Perfect for quick iterative bursts, pull request reviews, bug
+                squashing, and administrative tasks.
               </p>
               <div className="pt-2 flex items-center text-xs font-medium text-neutral-900 dark:text-neutral-100 group-hover:translate-x-1 transition-transform">
                 <span>Start 25m Pomodoro</span>
@@ -712,7 +482,8 @@ export const LandingPage: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-neutral-500 dark:text-zinc-400 leading-relaxed">
-                Unstructured, relaxed focus sessions with real-time status dots and shared activity tracking.
+                Unstructured, relaxed focus sessions with real-time status dots
+                and shared activity tracking.
               </p>
               <div className="pt-2 flex items-center text-xs font-medium text-neutral-900 dark:text-neutral-100 group-hover:translate-x-1 transition-transform">
                 <span>Open Stopwatch Room</span>
@@ -724,7 +495,10 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 7. Productivity Impact & Stats Banner */}
-      <section id="analytics" className="py-16 border-t border-neutral-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900">
+      <section
+        id="analytics"
+        className="py-16 border-t border-neutral-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900"
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             <div className="space-y-1">
@@ -767,14 +541,18 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 8. Frequently Asked Questions (FAQ) Accordion */}
-      <section id="faq" className="py-20 border-t border-neutral-200 dark:border-zinc-800/80">
+      <section
+        id="faq"
+        className="py-20 border-t border-neutral-200 dark:border-zinc-800/80"
+      >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center space-y-2">
             <h2 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
               Frequently Asked Questions
             </h2>
             <p className="text-sm text-neutral-600 dark:text-zinc-400">
-              Everything you need to know about getting starting with Sync co-working rooms.
+              Everything you need to know about getting starting with Sync
+              co-working rooms.
             </p>
           </div>
 
@@ -793,7 +571,9 @@ export const LandingPage: React.FC = () => {
                     <span>{item.q}</span>
                     <ChevronDown
                       className={`h-4 w-4 text-zinc-400 transition-transform duration-200 ${
-                        isOpen ? "rotate-180 text-neutral-900 dark:text-neutral-100" : ""
+                        isOpen
+                          ? "rotate-180 text-neutral-900 dark:text-neutral-100"
+                          : ""
                       }`}
                     />
                   </button>
@@ -817,7 +597,8 @@ export const LandingPage: React.FC = () => {
               Ready to find your team's flow state?
             </h2>
             <p className="text-sm sm:text-base text-zinc-400 max-w-xl mx-auto leading-relaxed">
-              Start a quiet co-working room in 1 click. No credit card required, no video meeting fatigue.
+              Start a quiet co-working room in 1 click. No credit card required,
+              no video meeting fatigue.
             </p>
             <div className="pt-2">
               <button
@@ -846,19 +627,34 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-6">
-            <a href="#demo" className="hover:text-neutral-800 dark:hover:text-zinc-200 transition-colors">
+            <a
+              href="#demo"
+              className="hover:text-neutral-800 dark:hover:text-zinc-200 transition-colors"
+            >
               Demo
             </a>
-            <a href="#features" className="hover:text-neutral-800 dark:hover:text-zinc-200 transition-colors">
+            <a
+              href="#features"
+              className="hover:text-neutral-800 dark:hover:text-zinc-200 transition-colors"
+            >
               Features
             </a>
-            <a href="#templates" className="hover:text-neutral-800 dark:hover:text-zinc-200 transition-colors">
+            <a
+              href="#templates"
+              className="hover:text-neutral-800 dark:hover:text-zinc-200 transition-colors"
+            >
               Aesthetics
             </a>
-            <a href="#workflows" className="hover:text-neutral-800 dark:hover:text-zinc-200 transition-colors">
+            <a
+              href="#workflows"
+              className="hover:text-neutral-800 dark:hover:text-zinc-200 transition-colors"
+            >
               Sprint Modes
             </a>
-            <a href="#faq" className="hover:text-neutral-800 dark:hover:text-zinc-200 transition-colors">
+            <a
+              href="#faq"
+              className="hover:text-neutral-800 dark:hover:text-zinc-200 transition-colors"
+            >
               FAQ
             </a>
           </div>
@@ -870,9 +666,10 @@ export const LandingPage: React.FC = () => {
       </footer>
 
       {/* Auth Modal */}
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 };
-
-
